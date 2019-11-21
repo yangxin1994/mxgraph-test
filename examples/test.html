@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+    <script>mxBasePath='../src';</script>
+    <script src="../src/js/mxClient.js"></script>
+</head>
+<body onload="main(document.getElementById('graphContainer'))">
+    <div id="graphContainer"></div>
+    
+    function main(container){
+        if(!mxClient.isBrowerSupported){
+            mxUtils.error('not supported',200,false);
+        }else{
+            
+        }
+    }
+</body>
+</html>

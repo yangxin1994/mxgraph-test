@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试圆形布局</title>
+    <script>mxBasePath='./src';</script>
+    <script src='../src/js/mxClient.js'></script>
+    
+    <style type="text/css">
+        body {padding: 10px;}
+        body>div {float:left;margin:10px;}
+        body>div>div.box {width:600px;height:300px;border:1px solid #999;overflow: hidden}
+    </style>
+</head>
+<body>
+    <div><p>第一个例子 <button>Layout</button></p><div class="box"></div></div>
+    
+    <script>
+        (function(){
+            var vertexWidth = 50;
+            var vertexHeight = 50;
+            
+            var box = document.querySelector('.box');
+            var button = document.querySelector('button');
+            
+            var randint = function(n,m){
+                var c = m - n + 1;
+                return Math.floor(Math.random()*c+n);
+            };
+            
+            var create = function(width,height,n,gra,par){
+                var rangeWidth = parseInt(width,10) - vertexWidth;
+                var rangeHeight = parseInt(height,10) - vertexHeight;
+                
+                var x,y;
+                var arr=[];
+                var from;
+                var to;
+                var text;
+                
+                for(var m=0;m<n;m++){
+                    x = randint(0,rangeWidth);
+                    y = randint(0,rangeHeight);
+                                
+                    if(m===0){
+                        x=randint(0,15);
+                        y=randint(0,15);
+                    }
+                    
+                    arr.push(gra.insertVertex(par,null,m+1,x,y,vertexWidth,vertexHeight));
+                }
+                
+                for(var m=0;m<arr.length;m++){
+                    if(typeof arr[m+1] ==='undefined'){
+                        to = arr[0];
+                    }else{
+                        to = arr[m+1];   
+                    }
+                    
+                    from = arr[m];
+                    text = from.getValue() + ' to '+ to.getValue(); 
+                    gra.insertEdge(par,null,text,from,to);
+                }
+                
+                return arr;
+            };
+            
+            var graph = new mxGraph(box);
+            var parent = graph.getDefaultParent();
+            
+            var arr = create(600,300,6,graph,parent);
+            
+            button.onclick = (function(gra,cells){
+                return function(){
+                    var layout = new mxCircleLayout(gra);
+                    layout.execute(gra.getDefaultParent());
+                };
+            })(graph,arr);
+        })();
+    </script>
+</body>
+</html>

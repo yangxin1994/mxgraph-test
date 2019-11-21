@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>综合各项练习</title>
+    <script>mxBasePath = '../src';</script>
+    <script src="../src/js/mxClient.js" ></script>
+    
+    
+    <!--问：cell是如何和告警事件操作关联起来的呢？
+        答：绘制出的图形是名称v1,v2，即为input框的value值，两者必须一致，于是关联起来--> 
+    
+    <script>
+        function main(container){
+            if(!mxClient.isBrowserSupported){
+                mxUtils.error('not supported!',200,false);
+            }else{
+                var graph = new mxGraph(container);
+                var parent = graph.getDefaultParent();
+                
+                graph.setTooltips(true);
+                
+                //定义样式
+                var style={};
+                
+                style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_LABEL;
+                style[mxConstants.STYLE_STROKEWIDTH] = 10;
+                style[mxConstants.STYLE_STROKECOLOR] = '#999999';
+                graph.getStylesheet().putCellStyle('style1',style);
+                
+                
+                //修改默认样式
+                var style2 = graph.getStylesheet().getDefaultVertexStyle();
+                style2[mxConstants.STYLE_FILLCOLOR] = "#CCCCCC";
+                style2[mxConstants.STYLE_FONTCOLOR] = "#000000";
+                style2[mxConstants.STYLE_FONTSIZE] = 30;
+
+                
+                
+                //添加告警 按钮事件
+                var btn = document.getElementById('add');
+                btn.addEventListener('click',function(){
+                    var addForm = document.getElementById('addform');
+                    if(addForm.style.display == 'none'){
+                        addForm.style.display = 'block';
+                    }else{
+                        addForm.style.display = 'none';
+                    }
+                });
+                
+                //告警提交 按钮事件
+                var btn = document.getElementById('addcommitbtn');
+                btn.addEventListener('click',function(){
+                    var addForm = document.getElementById('addform');
+                    addForm.style.display = 'none';
+                    
+                    //自定义 复选框和 textarea是一一对应的
+                    var boxs = addForm.querySelectorAll('input');
+                    var texts = addForm.querySelectorAll('textarea');
+                    for(var i=0;i<boxs.length;i++){
+                        if(boxs[i].checked ===true){
+                            var o = eval("(function(){return "+boxs[i].value+"})();");
+                            addOverlay(o.id,texts[i].value);
+                        }
+                    }
+                });
+                
+                //取消告警 按钮事件
+                var btn = document.getElementById('del');
+                btn.addEventListener('click',function(){
+                    var addForm = document.getElementById('addform');
+                    
+                    //自定义 复选框和 textarea是一一对应的
+                    var boxs = addForm.querySelectorAll('input');
+                    for(var i=0;i<boxs.length;i++){
+                        if(boxs[i].checked ===true){
+                            var o = eval("(function(){return "+boxs[i].value+"})();");
+                            delOverlay(o.id);
+                        }
+                    }
+                });
+                
+                
+                graph.getModel().beginUpdate();
+                try{
+                    var v1 = graph.insertVertex(parent,null,'box1',50,50,100,60,'style1');
+                    var v2 = graph.insertVertex(parent,null,'box2',300,50,100,60);
+                    
+                    var l = graph.insertEdge(parent,null,'connect v1 to v2',v1,v2,'');
+                }finally{
+                    graph.getModel().endUpdate();
+                }
+                
+                        
+        //给物体添加告警
+        var addOverlay = function(id,state){
+            var cell = graph.getModel().getCell(id);
+            
+            
+            //修改报警物体的样式
+            graph.setCellStyles(mxConstants.STYLE_FILLCOLOR,"#FF0000",[cell]);
+            graph.setCellStyles(mxConstants.STYLE_FONTCOLOR,"#FFFFFF",[cell]);
+            
+            //添加告警
+            graph.addCellOverlay(cell,createOverlay(graph.warningImage,'状态:'+state));
+        };
+        
+        //移除告警
+        var delOverlay = function(id){
+            var cell = graph.getModel().getCell(id);
+            
+            graph.setCellStyles(mxConstants.STYLE_FILLCOLOR,"#CCCCCC",[cell]);
+            graph.setCellStyles(mxConstants.STYLE_FONTCOLOR,"#000000",[cell]);
+            
+            graph.removeCellOverlays(cell);
+        };
+        
+        //创建告警
+        var createOverlay = function(image,tooltip){
+            var overlay = new mxCellOverlay(image,tooltip);
+            
+            overlay.addListener(mxEvent.CLICK,function(sender,evt){
+                mxUtils.alert(tooltip);
+            });
+            
+            return overlay;
+        };
+            }
+        }
+
+    </script>
+</head>
+<body onload="main(document.getElementById('graphContainer'));">
+    <div id = 'graphContainer'
+       style="position:relative;overflow:visible;background:url('editors/images/grid.gif')">
+    </div>
+    
+    <div>
+       <button id="add">添加告警</button>
+       <button id="del">删除告警</button> 
+    </div>
+    
+    <div id="addform" style="display:none">
+       <p>
+           <span>V1<input type="checkbox" value="v1" class="box"/></span>
+           <span>V2<input type="checkbox" value="v2" class="box"/></span>
+       </p>
+        <p>
+            <textarea placeholder="V1"></textarea>
+            <textarea placeholder="V2"></textarea>
+        </p>
+        <p><button id="addcommitbtn">OK</button></p>
+    </div>
+    
+</body>
+</html>

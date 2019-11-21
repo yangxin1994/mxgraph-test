@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试随机布局</title>
+    <script> mxBasePath = '../src';</script>
+    <script src="../src/js/mxClient.js"></script>
+    
+    <style type="text/css">
+        body { padding:10px;}
+        body>div { float:left;margin:10px;}
+        body>div>div.box { width:600px;height:300px;border:1px solid #999;overflow: hidden}
+    </style>
+</head>
+<body>
+    <div>
+        <p>
+            第一个例子
+            <button>Layout</button>
+        </p>        
+        <div class="box"></div>
+    </div>
+    
+    <script>
+        (function(){
+            var vertexWidth = 50;
+            var vertexHeight = 50;
+            
+            var box = document.querySelector('.box');
+            var button = document.querySelector('button');
+            
+            //返回一个[n,m]之间的随机数,floor(n)函数是取最接近n的小于等于n的整数，即小数全部舍掉
+            var randint = function(n,m){
+                c = m-n+1;
+                return Math.floor(Math.random()*c+n);
+            };
+            
+            //n是要绘制的图形的个数
+            var create = function(width,height,n,gra,par){
+                var arr=[];
+                var from;//连接的 源图形
+                var to;//连接的 目标图形
+                var text="";//连接线上的 文本
+                
+                //rangeWidth和rangeHeight分别为图形在width和height构成的区域内，图形左上点能活动的区域。
+                rangeWidth = parseInt(width,10) - vertexWidth;
+                rangeHeight = parseInt(height,10) - vertexHeight;
+                
+                //绘制图形.第一个图形绘制在x,y都在[0,10]之间，其余图形的x,y在[0,rangeWidth/rangeHeight]之间
+                for(var m=0;m<n;m++){
+                    var x=randint(0,rangeWidth);
+                    var y=randint(0,rangeHeight);
+                    
+                    if(m===0){
+                        x=randint(0,10);
+                        y=randint(0,10);
+                    }
+                    //m+1是图形的值，分别为1,2...n,代表几号图形
+                    arr.push(gra.insertVertex(par,null,m+1,x,y,vertexWidth,vertexHeight));
+                }
+                
+                //绘制连接线
+                for(var m=0;m<arr.length;m++){
+                    //如果只绘制了一个图形，则自己连接自己
+                    if(typeof arr[m+1] ==="undefined"){
+                        to = arr[0];
+                    }else{
+                        to = arr[m+1];
+                    }
+
+                    from = arr[m];
+                    text = from.getValue()+" to "+to.getValue();
+                    gra.insertEdge(par,null,text,from,to);
+                }
+            
+                return arr;
+            };
+            
+            var graph = new mxGraph(box);
+            var parent = graph.getDefaultParent();
+            
+            var arr;
+            
+            graph.setEnabled(true);
+            graph.setConnectable(true);
+            
+            arr = create(600,300,3,graph,parent);
+            
+            button.onclick = (function(gra,cells){
+                return function(){
+                    gra.getModel().beginUpdate();
+                    
+                    var layout = new mxFastOrganicLayout(gra);
+                    layout.execute(gra.getDefaultParent());
+                    
+                    var morph = new mxMorphing(gra);
+                    morph.addListener(mxEvent.DONE,function(){
+                        gra.getModel().endUpdate();
+                    });
+                    
+                    morph.startAnimation();
+                };
+            })(graph,arr);
+            
+        })();
+    </script>
+</body>
+</html>

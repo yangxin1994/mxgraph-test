@@ -1,0 +1,285 @@
+<!Doctype html>  
+<html xmlns=http://www.w3.org/1999/xhtml>  
+    <head>  
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">  
+    <title>监控台</title>  
+  
+    <!-- 如果本文件的包与src不是在同一个目录,就要将basepath设置到src目录下 -->  
+    <script type="text/javascript">  
+        mxBasePath = '../src';  
+    </script>  
+  
+    <!-- 引入支持库文件 -->  
+    <script type="text/javascript" src="../src/js/mxClient.js"></script>  
+    <!-- 示例代码 -->  
+    <script type="text/javascript">  
+        // 程序在此方法中启动   
+        function main(container)  
+        {  
+            // 检查浏览器支持  
+            if (!mxClient.isBrowserSupported())  
+            {  
+                mxUtils.error('Browser is not supported!', 200, false);  
+            }  
+            else  
+            {  
+                // 在容器中创建图形  
+                var graph = createGraph(container);  
+  
+                // 创建监控图形需要的xml文件  
+                var xml = '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+  
+                    '<mxCell id="2" value="Claim Handling Process" style="swimlane" vertex="1" parent="1"><mxGeometry x="1" width="840" height="400" as="geometry"/></mxCell>'+  
+                    '<mxCell id="3" value="Claim Manager" style="swimlane" vertex="1" parent="2"><mxGeometry x="24" width="816" height="200" as="geometry"/></mxCell>'+  
+                    '<mxCell id="5" value="" style="start" vertex="1" parent="3"><mxGeometry x="40" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="AuthorizeClaim" value="Authorize&#xa;Claim" vertex="1" parent="3"><mxGeometry x="90" y="80" width="100" height="40" as="geometry"/></mxCell>'+  
+                    '<mxCell id="6" value="X" style="step" vertex="1" parent="3"><mxGeometry x="210" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="ApproveClaim" value="Approve&#xa;Claim" vertex="1" parent="3"><mxGeometry x="260" y="80" width="100" height="40" as="geometry"/></mxCell>'+  
+                    '<mxCell id="7" value="X" style="step" vertex="1" parent="3"><mxGeometry x="380" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="8" value="" edge="1" parent="3" source="5" target="AuthorizeClaim"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="9" value="" edge="1" parent="3" source="AuthorizeClaim" target="6"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="10" value="" edge="1" parent="3" source="6" target="ApproveClaim"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="11" value="" edge="1" parent="3" source="ApproveClaim" target="7"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="12" value="" edge="1" parent="3" source="7" target="AuthorizeClaim"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="140" y="40"/></Array></mxGeometry></mxCell>'+  
+                    '<mxCell id="ReviewClaim" value="Review&#xa;Claim" vertex="1" parent="3"><mxGeometry x="480" y="80" width="100" height="40" as="geometry"/></mxCell>'+  
+                    '<mxCell id="22" value="X" style="step" vertex="1" parent="3"><mxGeometry x="600" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="23" value="" edge="1" parent="3" source="ReviewClaim" target="22"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="ApproveReviewedClaim" value="Approve Rev.&#xa;Claim" vertex="1" parent="3"><mxGeometry x="650" y="80" width="100" height="40" as="geometry"/></mxCell>'+  
+                    '<mxCell id="26" value="" edge="1" parent="3" source="22" target="ApproveReviewedClaim"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="27" value="X" style="step" vertex="1" parent="3"><mxGeometry x="770" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="28" value="" edge="1" target="27" parent="3" source="ApproveReviewedClaim"><mxGeometry relative="1" as="geometry"><mxPoint x="740" y="100" as="sourcePoint"/><mxPoint x="760" y="100" as="targetPoint"/></mxGeometry></mxCell>'+  
+                    '<mxCell id="32" value="" edge="1" parent="3" source="27" target="ReviewClaim"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="665" y="160"/></Array></mxGeometry></mxCell>'+  
+                    '<mxCell id="4" value="Accountant" style="swimlane" vertex="1" parent="2"><mxGeometry x="24" y="200" width="816" height="200" as="geometry"/></mxCell>'+  
+                    '<mxCell id="EnterAccountingData" value="Enter&#xa;Data" vertex="1" parent="4"><mxGeometry x="430" y="80" width="100" height="40" as="geometry"/></mxCell>'+  
+                    '<mxCell id="14" value="X" style="step" vertex="1" parent="4"><mxGeometry x="550" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="15" value="" edge="1" parent="4" source="EnterAccountingData" target="14"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="CheckAccountingData" value="Check&#xa;Data" vertex="1" parent="4"><mxGeometry x="600" y="80" width="100" height="40" as="geometry"/></mxCell>'+  
+                    '<mxCell id="16" value="" edge="1" parent="4" source="14" target="CheckAccountingData"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="17" value="X" style="step" vertex="1" parent="4"><mxGeometry x="720" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="18" value="" edge="1" parent="4" source="CheckAccountingData" target="17"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="19" value="" style="end" vertex="1" parent="4"><mxGeometry x="770" y="85" width="30" height="30" as="geometry"/></mxCell>'+  
+                    '<mxCell id="20" value="" edge="1" parent="4" source="17" target="19"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="31" value="" edge="1" parent="4" source="17" target="EnterAccountingData"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="625" y="160"/></Array></mxGeometry></mxCell>'+  
+                    '<mxCell id="13" value="" edge="1" parent="2" source="7" target="EnterAccountingData"><mxGeometry relative="1" as="geometry"/></mxCell>'+  
+                    '<mxCell id="24" value="" edge="1" parent="2" source="14" target="ReviewClaim" style="edgeStyle=none"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="589" y="180"/><mxPoint x="480" y="180"/><mxPoint x="480" y="100"/></Array></mxGeometry></mxCell>'+  
+                    '<mxCell id="29" value="" edge="1" parent="2" source="22" target="EnterAccountingData"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="469" y="40"/></Array></mxGeometry></mxCell>'+  
+                    '<mxCell id="30" value="" edge="1" parent="2" source="27" target="EnterAccountingData"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="469" y="40"/></Array></mxGeometry></mxCell>'+  
+                    '<mxCell id="33" value="" edge="1" parent="2" source="6" target="EnterAccountingData"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="249" y="200"/></Array></mxGeometry></mxCell>'+  
+                    '</root></mxGraphModel>';  
+                var doc = mxUtils.parseXml(xml);  
+                var codec = new mxCodec(doc);  
+                codec.decode(doc.documentElement, graph.getModel());  
+            }  
+              
+            // 创建更新按钮  
+            document.body.appendChild(mxUtils.button('Update', function(evt)  
+            {  
+                //XML通常是根据URL在服务器端使用mxUtils.get这个方法获得的结果，这只是一个测试例子  
+                var xml = '<process><update id="ApproveClaim" state="'+getState()+'"/><update id="AuthorizeClaim" state="'+getState()+'"/>'+  
+                    '<update id="CheckAccountingData" state="'+getState()+'"/><update id="ReviewClaim" state="'+getState()+'"/>'+  
+                    '<update id="ApproveReviewedClaim" state="'+getState()+'"/><update id="EnterAccountingData" state="'+getState()+'"/></process>';  
+                update(graph, xml);  
+            }));  
+        };  
+  
+        /**  
+         * 使用XML数据更新监控图  
+         */  
+        function update(graph, xml)  
+        {  
+            if (xml != null &&  
+                xml.length > 0)  
+            {  
+                var doc = mxUtils.parseXml(xml);  
+                  
+                if (doc != null &&  
+                    doc.documentElement != null)  
+                {  
+                    var model = graph.getModel();  
+                    var nodes = doc.documentElement.getElementsByTagName('update');  
+                      
+                    if (nodes != null &&  
+                        nodes.length > 0)  
+                    {  
+                      
+                        model.beginUpdate();  
+                        try  
+                        {  
+                            for (var i = 0; i < nodes.length; i++)  
+                            {  
+                                // 处理活动的节点  
+                                var id = nodes[i].getAttribute('id');  
+                                var state = nodes[i].getAttribute('state');  
+                                  
+                                // 从图形中获取活动元素的名称  
+                                var cell = model.getCell(id);  
+                                  
+                                // 更新单元格颜色，并添加了一些提示信息  
+                                if (cell != null)  
+                                {  
+                                    // 重新设置填充色  
+                                    graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);  
+                                    graph.removeCellOverlays(cell);  
+              
+                                    // 更改元素颜色状态  
+                                    if (state == 'Running')  
+                                    {  
+                                        graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#2DFF2C', [cell]);  
+                                    }  
+                                    else if (state == 'Waiting')  
+                                    {  
+                                        graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFAF1B', [cell]);  
+                                    }  
+                                    else if (state == 'Completed')  
+                                    {  
+                                        graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFFF10', [cell]);  
+                                    }  
+                                      
+                                    // 将使用图标的提示信息  
+                                    if (state != 'Init')  
+                                    {  
+                                        // 设置图形中的单元格  
+                                        graph.addCellOverlay(cell, createOverlay(graph.warningImage, 'State: '+state));  
+                                    }  
+                                }  
+                            } // for  
+                        }  
+                        finally  
+                        {  
+                            model.endUpdate();  
+                        }  
+                    }  
+                }  
+            }  
+        };  
+          
+        /**  
+         * 创建一个覆盖对象，使用给定的提示图表和提示文本。  
+         */  
+        function createOverlay(image, tooltip)  
+        {  
+            var overlay = new mxCellOverlay(image, tooltip);  
+  
+            // Installs a handler for clicks on the overlay  
+            overlay.addListener(mxEvent.CLICK, function(sender, evt)  
+            {  
+                mxUtils.alert(tooltip+'\n'+'Last update: '+new Date());  
+            });  
+              
+            return overlay;  
+        };  
+          
+        /**  
+         * 在给定的容器中创建并返回一个空图。  
+         */  
+        function createGraph(container)  
+        {  
+            var graph = new mxGraph(container);  
+            graph.setTooltips(true);  
+            graph.setEnabled(false);  
+              
+            // 禁止折叠  
+            graph.isCellFoldable = function(cell, collapse)  
+            {  
+                return false;  
+            };  
+  
+            // 创建处理时的样式  
+            var style = graph.getStylesheet().getDefaultVertexStyle();  
+            style[mxConstants.STYLE_FONTSIZE] = '12';  
+            style[mxConstants.STYLE_FONTCOLOR] = 'black';  
+            style[mxConstants.STYLE_STROKECOLOR] = 'black';  
+            style[mxConstants.STYLE_FILLCOLOR] = 'white';  
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';  
+            style[mxConstants.STYLE_GRADIENT_DIRECTION] = mxConstants.DIRECTION_EAST;  
+            style[mxConstants.STYLE_ROUNDED] = true;  
+            style[mxConstants.STYLE_SHADOW] = true;  
+            style[mxConstants.STYLE_FONTSTYLE] = 1;  
+              
+            style = graph.getStylesheet().getDefaultEdgeStyle();  
+            style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;  
+            style[mxConstants.STYLE_STROKECOLOR] = 'black';  
+            style[mxConstants.STYLE_ROUNDED] = true;  
+                              
+            style = [];  
+            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;  
+            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;  
+            style[mxConstants.STYLE_STROKECOLOR] = 'gray';  
+            style[mxConstants.STYLE_FONTCOLOR] = 'black';  
+            style[mxConstants.STYLE_FILLCOLOR] = '#E0E0DF';  
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';  
+            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;  
+            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;  
+            style[mxConstants.STYLE_STARTSIZE] = 24;  
+            style[mxConstants.STYLE_FONTSIZE] = '12';  
+            style[mxConstants.STYLE_FONTSTYLE] = 1;  
+            style[mxConstants.STYLE_HORIZONTAL] = false;  
+            graph.getStylesheet().putCellStyle('swimlane', style);  
+              
+            style = [];  
+            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RHOMBUS;  
+            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RhombusPerimeter;  
+            style[mxConstants.STYLE_STROKECOLOR] = 'gray';  
+            style[mxConstants.STYLE_FONTCOLOR] = 'gray';  
+            style[mxConstants.STYLE_FILLCOLOR] = '#91BCC0';  
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';  
+            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;  
+            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;  
+            style[mxConstants.STYLE_FONTSIZE] = '14';  
+            graph.getStylesheet().putCellStyle('step', style);  
+              
+            style = [];  
+            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_ELLIPSE;  
+            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;  
+            style[mxConstants.STYLE_STROKECOLOR] = 'gray';  
+            style[mxConstants.STYLE_FONTCOLOR] = 'gray';  
+            style[mxConstants.STYLE_FILLCOLOR] = '#A0C88F';  
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';  
+            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;  
+            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;  
+            style[mxConstants.STYLE_FONTSIZE] = '14';  
+            graph.getStylesheet().putCellStyle('start', style);  
+              
+            style = mxUtils.clone(style);  
+            style[mxConstants.STYLE_FILLCOLOR] = '#DACCBC';  
+            style[mxConstants.STYLE_STROKECOLOR] = '#AF7F73';  
+            style[mxConstants.STYLE_STROKEWIDTH] = 3;  
+            graph.getStylesheet().putCellStyle('end', style);  
+              
+            return graph;  
+        };  
+          
+        /**  
+         * 返回一个随机的状态。  
+         */  
+        function getState()  
+        {  
+            var state = 'Init';  
+            var rnd = Math.random() * 4;  
+              
+            if (rnd > 3)  
+            {  
+                state = 'Completed';  
+            }  
+            else if (rnd > 2)  
+            {  
+                state = 'Running';  
+            }  
+            else if (rnd > 1)  
+            {  
+                state = 'Waiting';  
+            }  
+              
+            return state;  
+        };  
+    </script>  
+</head>  
+  
+<!-- 页面载入时启动程序 -->  
+<body onload="main(document.getElementById('graphContainer'));">  
+  
+    <!-- 创建一个容器 -->  
+    <div id="graphContainer" style="overflow:hidden;position:relative;width:861px;height:406px;cursor:default;">  
+    </div>  
+    <br>  
+</body>  
+</html>  

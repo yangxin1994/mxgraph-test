@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"> 
+    <title>Some tests</title>
+    <script>mxBasePath='../src';</script>
+    <script src="../src/js/mxClient.js"></script>
+    
+    <style type="text/css">
+        body { padding: 10px;}
+        
+        #leftSiderContainer {position:absolute;width:80px;height: 600px;overflow: hidden; background-color: darkgray;}
+        
+        #graphContainer {position:absolute;left:100px;width:1200px;height:600px;overflow:hidden;border:1px dashed #999;}
+        
+        #operationContainer {position:absolute;left:100px;padding-top: 0px;width:1200px;}
+       
+    </style>
+</head>
+<body onload="main(document.getElementById('graphContainer'),document.getElementById('leftSiderContainer'),
+  document.getElementById('operationContainer'));">
+   
+    <div id="graphContainer"></div>
+    <div id="leftSiderContainer"></div>
+    <div id="operationContainer"></div>
+    
+    <script type="text/javascript">
+        function main(container,leftContainer,operContainer){
+            
+            //定义的创建 功能按钮 的函数
+            var createButton = function(label,fun){
+                operContainer.appendChild(mxUtils.button(label,fun));
+            };
+            
+            //生成随机数的函数
+            var randint = function(n,m){
+                var c = m-n+1;
+                return Math.floor(Math.random()*c+n);
+            };
+            
+            //undo、redo设置
+            var undoManager = new mxUndoManager();
+                
+            var listener = function(sender,evt){
+                undoManager.undoableEditHappened(evt.getProperty('edit'));
+            }
+            
+            
+            var buttons = [
+                {
+                    label:'SelectAll',
+                    fun:function(graph){
+                        return function(evt){
+                            graph.selectAll();
+                        };
+                    }
+                },
+                {
+                    label:'SelectOne',
+                    fun:function(graph){
+                        return function(evt){
+                            graph.selectCell();
+                        };
+                    }
+                },
+                {
+                    label:'CancelSelection',
+                    fun:function(graph){
+                        return function(evt){
+                            var cells = graph.getSelectionCells();
+                            graph.removeSelectionCells(cells);
+                        };
+                    }
+                },
+                {
+                    label:'RandAdd',
+                    fun:function(graph){
+                        return function(evt){
+                            var randColor = function(){
+                                return "rgb("+randint(0,255)+","+randint(0,255)+","+randint(0,255)+")";
+                            };
+                            
+                            var style = "fillColor="+randColor()+";fontColor="+randColor();
+                            
+                            var width = randint(60,200);
+                            var height = randint(60,200);
+                            
+                            var x = randint(0,1200-width);
+                            var y = randint(0,600-height);
+                            
+                            graph.insertVertex(graph.getDefaultParent(),null,'randomText',x,y,width,height,style);
+                        };
+                    }
+                },
+                {
+                    label:'Group',
+                    fun:function(graph){
+                        return function(evt){
+                            var cells = graph.getSelectionCells();
+                            //第一个参数：目标组的cell
+                            //第二个参数是：组内cell和组的四个边框的距离
+                            graph.groupCells(null,30,cells);
+                        };
+                    }
+                },
+                {
+                    //将分组内的cell都弄没了
+                    label:'UnGroup',
+                    fun:function(graph){
+                        return function(evt){
+                            var cells = graph.getSelectionCells();
+                            graph.ungroupCells(cells);
+                        };
+                    }
+                },
+                {
+                    label:'DeleteSelection',
+                    fun:function(graph){
+                        return function(evt){
+                            var cells = graph.getSelectionCells();
+                            graph.removeCells(cells);
+                        };
+                    }
+                },
+                {
+                    label:'ZoomIn',
+                    fun:function(graph){
+                        return function(evt){
+                              graph.zoomIn();
+                        };
+                    }
+                },
+                {
+                    label:'ZoomOut',
+                    fun:function(graph){
+                        return function(evt){
+                            graph.zoomOut();
+                        }
+                    }
+                },
+                {
+                    label:'ZoomActual',
+                    fun:function(graph){
+                        return function(evt){
+                            graph.zoomActual();
+                        }
+                    }
+                },
+                {
+                    //存在问题：moveCells函数并不能移动图形
+                    label:'RandomSelection',
+                    fun:function(graph){
+                        return function(evt){
+                            var cells = graph.getSelectionCells();
+                            
+                            var xs = new Array();
+                            var ys=new Array(); 
+                            
+                            for(var i=0;i<cells.length;i++){
+                                var x = randint(0,1200-cells[i].geometry.width);
+                                var y = randint(0,600-cells[i].geometry.height);
+                                
+                                xs[i] = x;
+                                ys[i] = y;
+                                
+                                console.log("xs"+i+"=:"+xs[i]);
+                                console.log("ys"+i+"=:"+ys[i]);
+                            }
+                            graph.moveCells(cells,xs,ys);
+                        }
+                    }
+                },
+                {
+                    label:'Undo',
+                    fun:function(graph){
+                        return function(evt){
+                            
+                            undoManager.undo();
+                        }
+                    }
+                },
+                {
+                    label:'Redo',
+                    fun:function(graph){
+                        return function(evt){
+                            undoManager.redo();
+                        }
+                    }
+                }
+            ];
+            
+            //var container = document.getElementById('graphContainer');
+            var graph = new mxGraph(container);
+            
+            var createVertex = function(){
+               
+                var parent = graph.getDefaultParent();
+                
+                //开启图形拖拽 功能
+                new mxRubberband(graph);
+                
+                var v1 = graph.insertVertex(parent,null,"text1",100,200,100,100);
+                var v2 = graph.insertVertex(parent,null,"text2",250,200,100,100);
+                var v3 = graph.insertVertex(parent,null,"text3",400,200,100,100);
+                var v4 = graph.insertVertex(parent,null,"text4",250,400,100,100);
+                var v5 = graph.insertVertex(parent,null,"text5",400,400,100,100);
+                
+                return graph;
+            };
+            
+            //定义左边栏 图标
+            var addLeftSiderIcon = function(graph,leftSiderbar,label,image){
+                
+                var funct = function(graph,evt,cell,x,y){
+                    if(graph.canImportCell(cell)){
+                        
+                        var parent = graph.getDefaultParent();
+                        var vertex = null;
+                        graph.getModel().beginUpdate();
+                        try{
+                           vertex = graph.insertVertex(parent,null,label,x,y,120,120);
+                        }finally{
+                            graph.getModel().endUpdate();
+                        }
+                        
+                        graph.setSelectionCell(vertex);
+                    }
+                }
+                //创建用来拖动的 侧边栏图标
+                var img = document.createElement('img');
+                img.setAttribute('src',image);
+                img.style.width = '60px';
+                img.style.height = '60px';
+                img.title = 'Drag this to graph';
+                leftSiderbar.appendChild(img);
+                
+                var dragElt = document.createElement('div');
+                dragElt.style.border = 'dashed black 1px';
+                dragElt.style.width = '120px';
+                dragElt.style.height = '120px';
+                
+                //创建的图像，它被用作拖动图标(预览)
+                var ds = mxUtils.makeDraggable(img,graph,funct,dragElt,0,0,true,true);
+                ds.setGuidesEnabled(true);
+            };
+            
+           
+            
+            (function(){
+                
+                graph = createVertex();
+                
+;
+            
+                graph.getModel().addListener(mxEvent.UNDO,listener);
+                graph.getView().addListener(mxEvent.UNDO,listener);
+                
+                addLeftSiderIcon(graph,leftContainer,'<img src="images/icons48/server.png" />','images/icons48/server.png');
+                addLeftSiderIcon(graph,leftContainer,'<img src="images/icons48/server.png" />','images/icons48/server.png');
+                addLeftSiderIcon(graph,leftContainer,'<img src="images/icons48/server.png" />','images/icons48/server.png');
+                addLeftSiderIcon(graph,leftContainer,'<img src="images/icons48/server.png" />','images/icons48/server.png');
+                addLeftSiderIcon(graph,leftContainer,'<img src="images/icons48/server.png" />','images/icons48/server.png');
+                addLeftSiderIcon(graph,leftContainer,'<img src="images/icons48/server.png" />','images/icons48/server.png');
+                 
+                for(var i=0;i<buttons.length;i++){
+                    createButton(buttons[i].label,buttons[i].fun(graph));
+                }
+            })();
+        }
+    </script>
+</body>
+</html>

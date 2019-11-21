@@ -1,0 +1,337 @@
+<!Doctype html>  
+<html xmlns=http://www.w3.org/1999/xhtml>  
+    <head>  
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">  
+    <title>对象描述</title>  
+  
+    <!-- 如果本文件的包与src不是在同一个目录,就要将basepath设置到src目录下 -->  
+    <script type="text/javascript">  
+        mxBasePath = '../src';  
+    </script>  
+  
+    <!-- 引入支持库文件 -->  
+    <script type="text/javascript" src="../src/js/mxClient.js"></script>  
+      
+    <!-- 示例代码 -->  
+    <script type="text/javascript">  
+        //  程序在此方法中启动   
+        function main(container)  
+        {  
+            // 检测浏览器兼容性  
+            if (!mxClient.isBrowserSupported())  
+            {  
+                mxUtils.error('Browser is not supported!', 200, false);  
+            }  
+            else  
+            {  
+                // 请注意，这些XML节点将被封装在输出中的元素模型中  
+                var doc = mxUtils.createXmlDocument();  
+  
+                var person1 = doc.createElement('Person');  
+                person1.setAttribute('firstName', 'Daffy');  
+                person1.setAttribute('lastName', 'Duck');  
+  
+                var person2 = doc.createElement('Person');  
+                person2.setAttribute('firstName', 'Bugs');  
+                person2.setAttribute('lastName', 'Bunny');  
+  
+                var relation = doc.createElement('Knows');  
+                relation.setAttribute('since', '1985');  
+                  
+                // 在容器中创建图形  
+                var graph = new mxGraph(container);  
+  
+                // 禁用调整大小  
+                graph.setCellsResizable(false);  
+                  
+                // 配置图形中调整、添加  
+                graph.setResizeContainer(true);  
+                graph.minimumContainerSize = new mxRectangle(0, 0, 500, 380);  
+                graph.setBorder(60);  
+                  
+                // 按下Tab 和 回车键 停止编辑   
+                new mxKeyHandler(graph);  
+  
+                // 禁止边框编辑  
+                graph.isCellEditable = function(cell)  
+                {  
+                    return !this.getModel().isEdge(cell);  
+                };  
+                  
+                // 提供一个在显示屏上的单元格标签  
+                graph.convertValueToString = function(cell)  
+                {  
+                    if (mxUtils.isNode(cell.value))  
+                    {  
+                        if (cell.value.nodeName.toLowerCase() == ('person'))  
+                        {  
+                            var firstName = cell.getAttribute('firstName', '');  
+                            var lastName = cell.getAttribute('lastName', '');  
+  
+                            if (lastName != null && lastName.length > 0)  
+                            {  
+                                return lastName + ', ' + firstName;  
+                            }  
+  
+                            return firstName;  
+                        }  
+                        else if (cell.value.nodeName.toLowerCase() == 'knows')  
+                        {  
+                            return cell.value.nodeName + ' (Since '  
+                                    +  cell.getAttribute('since', '') + ')';  
+                        }  
+  
+                    }  
+  
+                    return '';  
+                };  
+  
+                // 存储在模型中的单元格标签  
+                var cellLabelChanged = graph.cellLabelChanged;  
+                graph.cellLabelChanged = function(cell, newValue, autoSize)  
+                {  
+                    if (mxUtils.isNode(cell.value) &&  
+                        cell.value.nodeName.toLowerCase() == ('person'))  
+                    {  
+                        var pos = newValue.indexOf(' ');  
+  
+                        var firstName = (pos > 0) ? newValue.substring(0,  
+                                pos) : newValue;  
+                        var lastName = (pos > 0) ? newValue.substring(  
+                                pos + 1, newValue.length) : '';  
+  
+                        // Clones the value for correct undo/redo  
+                        var elt = cell.value.cloneNode(true);  
+  
+                        elt.setAttribute('firstName', firstName);  
+                        elt.setAttribute('lastName', lastName);  
+  
+                        newValue = elt;  
+                        autoSize = true;  
+                    }  
+                      
+                    cellLabelChanged.apply(this, arguments);  
+                };  
+  
+                // 显示编辑值  
+                var getEditingValue = graph.getEditingValue;  
+                graph.getEditingValue = function(cell)  
+                {  
+                    if (mxUtils.isNode(cell.value) &&  
+                        cell.value.nodeName.toLowerCase() == ('person'))  
+                    {  
+                        var firstName = cell.getAttribute('firstName', '');  
+                        var lastName = cell.getAttribute('lastName', '');  
+  
+                        return firstName + ' ' + lastName;  
+                    }  
+                };  
+  
+                // 在边框上显示提示工具   
+                graph.setTooltips(true);  
+                  
+                var getTooltipForCell = graph.getTooltipForCell;  
+                graph.getTooltipForCell = function(cell)  
+                {  
+                    // 在边框上显示元素详情  
+                    if (graph.getModel().isEdge(cell))  
+                    {  
+                        var src = this.getLabel(this.getModel().getTerminal(cell, true));  
+                        var trg = this.getLabel(this.getModel().getTerminal(cell, false));  
+  
+                        return src + ' ' + cell.value.nodeName + ' ' +  trg;  
+                    }  
+  
+                    return getTooltipForCell.apply(this, arguments);  
+                };  
+                  
+                // 启用浏览器默认菜单  
+                new mxRubberband(graph);  
+  
+                // 添加了一个'显示XML=View XML'选项，以查看XML的图形  
+                document.body.appendChild(mxUtils.button('显示XML=View XML', function()  
+                {  
+                    //(为指定文档)构造一个XML编码器，
+                    var encoder = new mxCodec();
+                     
+                    //encode(obj);对指定的对象进行编码并返回结果的XML节点
+                    var node = encoder.encode(graph.getModel());  
+                    
+                    //popup(content,isInternalWindow);如果isInternalWindow为false，则在新的mxWindow或新的浏览器窗口中显示指定的文本内容。
+                    //是否打开新的窗口，默认false
+                    
+                    //.getPrettyXml(node,tab,indent);返回一个规范的打印字符串，
+                    //该字符串表示给定节点的XML树。此方法仅用于打印XML用于读取，使用getXml来获取一个字符串进行处理
+                    //tab:可选，表示缩进，默认2个空格。
+                    //indent:表示当前缩进的可选字符串，默认为空字符串。
+                    mxUtils.popup(mxUtils.getPrettyXml(node), true);  
+                }));  
+  
+                // 根据元素标记改变元素内容  
+                var style = graph.getStylesheet().getDefaultVertexStyle();  
+                style[mxConstants.STYLE_STROKECOLOR] = 'gray';  
+                style[mxConstants.STYLE_ROUNDED] = true;  
+                style[mxConstants.STYLE_SHADOW] = true;  
+                style[mxConstants.STYLE_FILLCOLOR] = '#DFDFDF';  
+                style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';  
+                style[mxConstants.STYLE_FONTCOLOR] = 'black';  
+                style[mxConstants.STYLE_FONTSIZE] = '12';  
+                style[mxConstants.STYLE_SPACING] = 4;  
+          
+                // 修改连接线默认样式  
+                style = graph.getStylesheet().getDefaultEdgeStyle();  
+                style[mxConstants.STYLE_STROKECOLOR] = '#0C0C0C';  
+                style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'white';  
+                style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;  
+                style[mxConstants.STYLE_ROUNDED] = true;  
+                style[mxConstants.STYLE_FONTCOLOR] = 'black';  
+                style[mxConstants.STYLE_FONTSIZE] = '10';  
+                  
+                // 创建默认窗体  
+                var parent = graph.getDefaultParent();  
+                                  
+                // 开启更新事务  
+                graph.getModel().beginUpdate();  
+                try  
+                {  
+                    var v1 = graph.insertVertex(parent, null, person1, 40, 40, 80, 30);  
+                    var v2 = graph.insertVertex(parent, null, person2, 200, 150, 80, 30);  
+                    var e1 = graph.insertEdge(parent, null, relation, v1, v2);  
+                }  
+                finally  
+                {  
+                    // 结束更新事务  
+                    graph.getModel().endUpdate();  
+                }  
+  
+                // 实现属性面板  
+                graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt)  
+                {  
+                    selectionChanged(graph);  
+                });  
+  
+                selectionChanged(graph);  
+            }  
+  
+            /**  
+             * 更新属性面板  
+             */  
+            function selectionChanged(graph)  
+            {  
+                var div = document.getElementById('properties');  
+  
+                // 在IE中使用焦点选中   
+                graph.container.focus();  
+  
+                // 取出DIV中的内容  
+                div.innerHTML = '';  
+  
+                // 获取被选择的 元素  
+                var cell = graph.getSelectionCell();  
+  
+                if (cell == null)  
+                {  
+                    mxUtils.writeln(div, 'Nothing selected.');  
+                }  
+                else  
+                {  
+                    // 写标题  
+                    var center = document.createElement('center');  
+                    mxUtils.writeln(center, cell.value.nodeName + ' (' + cell.id + ')');  
+                    div.appendChild(center);  
+                    mxUtils.br(div);  
+  
+                    // 创建的用户对象的属性  
+                    var form = new mxForm();  
+      
+                    var attrs = cell.value.attributes;  
+                      
+                    for (var i = 0; i < attrs.length; i++)  
+                    {  
+                        createTextField(graph, form, cell, attrs[i]);  
+                    }  
+      
+                    div.appendChild(form.getTable());  
+                    mxUtils.br(div);  
+                }  
+            }  
+  
+            /**  
+             * 给定的属性创建文本字段。  
+             */  
+            function createTextField(graph, form, cell, attribute)  
+            {  
+                var input = form.addText(attribute.nodeName + ':', attribute.nodeValue);  
+  
+                var applyHandler = function()  
+                {  
+                    var newValue = input.value || '';  
+                    var oldValue = cell.getAttribute(attribute.nodeName, '');  
+  
+                    if (newValue != oldValue)  
+                    {  
+                        graph.getModel().beginUpdate();  
+                          
+                        try  
+                        {  
+                            var edit = new mxCellAttributeChange(  
+                                   cell, attribute.nodeName,  
+                                   newValue);  
+                            graph.getModel().execute(edit);  
+                            graph.updateCellSize(cell);  
+                        }  
+                        finally  
+                        {  
+                            graph.getModel().endUpdate();  
+                        }  
+                    }  
+                };   
+  
+                mxEvent.addListener(input, 'keypress', function (evt)  
+                {  
+                    //需要考虑转变为文本区域  
+                    if (evt.keyCode == /*enter*/13 &&  
+                        !mxEvent.isShiftDown(evt))  
+                    {  
+                        input.blur();  
+                    }  
+                });  
+  
+                if (mxClient.IS_IE)  
+                {  
+                    mxEvent.addListener(input, 'focusout', applyHandler);  
+                }  
+                else  
+                {  
+                    // Note: Known problem is the blurring of fields in  
+                    // Firefox by changing the selection, in which case  
+                    // no event is fired in FF and the change is lost.  
+                    // As a workaround you should use a local variable  
+                    // that stores the focused field and invoke blur  
+                    // explicitely where we do the graph.focus above.  
+                    // 在Firefox中会出现某些不兼容，需要进行处理  
+                    mxEvent.addListener(input, 'blur', applyHandler);  
+                }  
+            }  
+        };  
+    </script>  
+</head>  
+  
+<!-- 页面载入后启动程序. -->  
+<body onload="main(document.getElementById('graphContainer'))">  
+    <table style="position:relative;">  
+    <tr>  
+        <td>  
+            <div id="graphContainer"  
+                style="border: solid 1px black;overflow:hidden;width:321px;height:241px;cursor:default;">  
+            </div>  
+        </td>  
+        <td valign="top">  
+            <div id="properties"  
+                style="border: solid 1px black; padding: 10px;">  
+            </div>  
+        </td>  
+    </tr>  
+    </table>  
+</body>  
+</html>  

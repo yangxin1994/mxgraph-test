@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>验证</title>
+    <script type="text/javascript">mxBasePath = '../src'; </script>
+    <script type="text/javascript" src="../src/js/mxClient.js" ></script>
+    
+    <script type="text/javascript">
+        function main(container){
+            if(!mxClient.isBrowserSupported()){
+                mxUtils.error('not support',200,false);
+            }else{
+                var xmlDocument = mxUtils.createXmlDocument();
+                var sourceNode = xmlDocument.createElement('Source');
+                var targetNode = xmlDocument.createElement('Target');
+                var subtargetNode = xmlDocument.createElement('Subtarget');
+                
+                var graph = new mxGraph(container);
+                
+                graph.setConnectable(true);
+                graph.setTooltips(true);
+                graph.setAllowDanglingEdges(false);
+                graph.setMultigraph(false);
+                
+                //multiplicities:描述图中允许的连接的mxMultiplicities数组
+                //.push():定义了一种规则，每个‘Source’必须连接1个或2个‘Target’。
+                graph.multiplicities.push(new mxMultiplicity(true,'Source',null,null,1,2,
+                                                            ['Target'],'Source must have 1 or 2 Targets',
+                                                            'Source must connect to target'));
+                
+                
+                //'Source'不希望传入任何的连接目标
+                graph.multiplicities.push(new mxMultiplicity(false,'Source',null,null,0,0,null,
+                                                            'Source must have no incoming edge',
+                                                            null));
+                
+                //Target 必须连接  一个 Source
+                graph.multiplicities.push(new mxMultiplicity(false,'Target',null,null,1,1,['Source'],
+                                                            'Target must have 1 Source',
+                                                            'Target must connect to Source'));
+                
+                //自动验证
+                var listener = function(sender,evt){
+                    graph.validateGraph();
+                };
+                
+                graph.getModel().addListener(mxEvent.CHANGE,listener);
+                
+                var parent = graph.getDefaultParent();
+                
+                graph.getModel().beginUpdate();
+                try{
+                    var v1 = graph.insertVertex(parent, null, sourceNode, 20, 20, 80, 30);  
+                    var v2 = graph.insertVertex(parent, null, targetNode, 200, 20, 80, 30);  
+                    var v3 = graph.insertVertex(parent, null, targetNode.cloneNode(true), 200, 80, 80, 30);  
+                    var v4 = graph.insertVertex(parent, null, targetNode.cloneNode(true), 200, 140, 80, 30);  
+                    var v5 = graph.insertVertex(parent, null, subtargetNode, 200, 200, 80, 30);  
+                    
+                    //下面两种写法没区别
+                   // var v6 = graph.insertVertex(parent, null, sourceNode.cloneNode(true), 20, 140, 80, 30); 
+                    var v6 = graph.insertVertex(parent, null, sourceNode, 20, 140, 80, 30); 
+                    
+                    var e1 = graph.insertEdge(parent, null, '', v1, v2);  
+                    var e2 = graph.insertEdge(parent, null, '', v1, v3);  
+                    var e3 = graph.insertEdge(parent, null, '', v6, v4);  
+                }finally{
+                    graph.getModel().endUpdate();
+                }
+                
+            }
+        };
+        
+    </script>
+    
+</head>
+<body onload = "main(document.getElementById('graphContainer'));">
+    <div id="graphContainer" style="overflow:hidden;position:relative;width:312px;hight:241px;
+       background:url('editors/images/grid.gif');cursor:default;">
+        
+    </div>
+</body>
+</html>

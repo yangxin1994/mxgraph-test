@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>线路图</title>
+    <script type="text/javascript">mxBasePath = '../src'; </script>
+    <script type="text/javascript" src="../src/js/mxClient.js" ></script>
+    
+    <script type="text/javascript">
+        function main(container){
+            
+            //检查浏览器支持
+            if(!mxClient.isBrowserSupported()){
+                mxUtils.error('the browser is not supported!',200,false);
+            }else{
+                var graph = new mxGraph(container);
+                
+                var parent = graph.getDefaultParent();
+                
+                graph.getModel().beginUpdate();
+                try{
+                    var v1 = graph.insertVertex(parent,null,'Hello',20,20,80,30);
+                    var v2 = graph.insertVertex(parent,null,'world',200,150,80,30);
+                    
+                    var e1 = graph.insertEdge(parent,null,'',v1,v2);
+                }finally{
+                    graph.getModel().endUpdate();
+                }
+                
+                //功能切换间隔1s
+                var f = function(){
+                    var overlays = graph.getCellOverlays(v1);
+                    
+                    if(overlays == null){
+                        graph.removeCellOverlays(v2);
+                        graph.setCellWarning(v1,'Tooltip');
+                    }else{
+                        graph.removeCellOverlays(v1);
+                        graph.setCellWarning(v2,'Tooltip');
+                    }
+                };
+                
+                //设置切换间隔1s
+                window.setInterval(f,1000);
+                f();
+            }
+        }
+        
+    </script>
+</head>
+<body onload = "main(document.getElementById('graphContainer'));">
+    <div id="graphContainer" style="overflow:hidden;position:relative;width:312px;hight:241px;
+       background:url('editors/images/grid.gif');cursor:default;">
+    </div>
+</body>
+</html>

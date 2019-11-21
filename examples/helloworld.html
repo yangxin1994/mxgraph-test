@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>mxGraph测试用例</title>
+
+    <script>
+        mxBasePath = '../src';
+    </script>
+
+    <script src="../src/js/mxClient.js"></script>
+
+    <script>
+        // 引入js文件
+        // mxClient.include(mxClient.basePath+'/hello.js');
+        function main(container)
+        {
+            // 判断浏览器是否支持
+            if (!mxClient.isBrowserSupported())
+            {
+                // mxUtils报错提示
+                mxUtils.error('Browser is not supported!', 200, false);
+            }
+            else
+            {
+                // 在已有容器内构造一个graph
+                var graph = new mxGraph(container);
+                // 鼠标框选 
+                new mxRubberband(graph);
+                // 在图形中创建默认组件 
+                var parent = graph.getDefaultParent();
+                // 设置图形可以被拖动
+                graph.setEnabled(true);  
+                // 容器大小自适应 
+                graph.setResizeContainer(true); 
+                // 允许改变元素大小 
+                graph.setCellsResizable(true); 
+
+
+                // 开始往module里添加cell
+                graph.getModel().beginUpdate();
+                try
+                {
+                    var v1 = graph.insertVertex(parent, null, 'Hello', 20, 20, 80, 30);
+                    var v2 = graph.insertVertex(parent, null, 'World', 200, 150, 80, 30);
+                    //插入线条设置连接图形
+                    var e1 = graph.insertEdge(parent, null, '', v1, v2);
+
+                    //预览时鼠标悬浮到节点时，改变鼠标样式
+                    graph.getCursorForCell = function (cell) {
+                      if (cell != null && cell.value != null && cell.vertex == 1) {
+                         return 'pointer';
+                      }
+                    };
+                }
+                finally
+                {
+                    // 更新事务结束
+                    graph.getModel().endUpdate();
+                }
+            }
+        };
+    </script>
+</head>
+<body onload="main(document.getElementById('graphContainer'))">
+    <div id="graphContainer"
+        style="position:relative;overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
+    </div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>绕线测试</title>
+    <script>mxBasePath='./src';</script>
+    <script src="../src/js/mxClient.js"></script>
+    
+    <style type="text/css">
+        * { margin:0px;padding:0px;}
+        body { padding:10px}
+        #container1 { width:100%;height:350px;overflow: hidden;border:1px dashed #999;}
+        #container2 { width:100%px;height:350px;overflow: hidden;border:1px solid #999;}
+    </style>
+</head>
+<body>
+    <div id="container1"></div>
+    <div id="container2"></div>
+    
+    <script>
+        (function(){
+            var container1 = document.getElementById('container1');
+            var graph1 = new mxGraph(container1);
+            var parent1 = graph1.getDefaultParent();
+            
+            var style={};
+            style = graph1.getStylesheet().getDefaultEdgeStyle();
+            style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;//设置连接线为 直角折线连接
+            
+            new mxRubberband(graph1);//开启 图形拖拽
+            
+            graph1.getModel().beginUpdate();
+            
+            var v1 = graph1.insertVertex(parent1,null,"text1",100,100,50,50);
+            var v2 = graph1.insertVertex(parent1,null,"text1",350,100,50,50);
+            var v3 = graph1.insertVertex(parent1,null,"text1",600,100,50,50);
+            
+            var e1 = graph1.insertEdge(parent1,null,"connect v1 to v3",v1,v3);
+            e1.geometry.points = [new mxPoint(400,50)];
+            
+            var e2 = graph1.insertEdge(parent1,null,"connect v1 to v2",v1,v2);
+            
+            graph1.getModel().endUpdate();
+        })();
+    </script>
+</body>
+</html>

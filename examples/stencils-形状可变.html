@@ -1,0 +1,233 @@
+<!Doctype html>  
+<html xmlns=http://www.w3.org/1999/xhtml>  
+    <head>  
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">  
+    <title>形状可变</title>  
+  
+    <!-- 如果本文件的包与src不是在同一个目录,就要将basepath设置到src目录下 -->  
+    <script type="text/javascript">  
+        mxBasePath = '../src';  
+    </script>  
+  
+    <!-- 引入支持库文件 -->  
+    <script type="text/javascript" src="../src/js/mxClient.js"></script>  
+  
+    <!-- 示例代码 -->  
+    <script type="text/javascript">  
+        //  程序在此方法中启动   
+        function main(container)  
+        {  
+            // 检查浏览器支持  
+            if (!mxClient.isBrowserSupported())  
+            {  
+                mxUtils.error('Browser is not supported!', 200, false);  
+            }  
+            else  
+            {  
+                // 去锯齿效果  
+                mxRectangleShape.prototype.crisp = true;  
+                  
+                // 设置全局阴影的颜色  
+                mxConstants.SHADOWCOLOR = '#C0C0C0';  
+                mxConstants.SHADOW_OPACITY = 0.5;  
+                mxConstants.SHADOW_OFFSET_X = 4;  
+                mxConstants.SHADOW_OFFSET_Y = 4;  
+                  
+                // 使用的形状，大小调整预览  
+                mxVertexHandler.prototype.createSelectionShape = function(bounds)  
+                {  
+                    var key = this.state.style[mxConstants.STYLE_SHAPE];  
+                    var stencil = mxStencilRegistry.getStencil(key);  
+                    var shape = null;  
+                      
+                    if (stencil != null)  
+                    {  
+                        shape = new mxStencilShape(stencil);  
+                        shape.apply(this.state);  
+                    }  
+                    else  
+                    {  
+                        shape = new this.state.shape.constructor();  
+                    }  
+                      
+                    shape.fill = null;  
+                    shape.bounds = bounds;  
+                    shape.stroke = this.getSelectionColor();  
+                    shape.strokewidth = this.getSelectionStrokeWidth();  
+                    shape.isDashed = this.isSelectionDashed();  
+                    shape.crisp = this.state.shape.crisp;  
+                      
+                    return shape;  
+                };  
+                  
+                // 模版加载导入注册表  
+                var req = mxUtils.load('stencils.xml');  
+                var root = req.getDocumentElement();  
+                var shape = root.firstChild;  
+                  
+                while (shape != null)  
+                {  
+                    if (shape.nodeType == mxConstants.NODETYPE_ELEMENT)  
+                    {  
+                        mxStencilRegistry.addStencil(shape.getAttribute('name'), new mxStencil(shape));  
+                    }  
+                      
+                    shapeshape = shape.nextSibling;  
+                }  
+                  
+                // 在容器中创建图形  
+                var graph = new mxGraph(container);  
+                graph.setConnectable(true);  
+                  
+                // 改变默认样式  
+                var style = graph.getStylesheet().getDefaultEdgeStyle();  
+                style[mxConstants.STYLE_EDGE] = 'orthogonalEdgeStyle';  
+                style = graph.getStylesheet().getDefaultVertexStyle();  
+                style[mxConstants.STYLE_FILLCOLOR] = '#adc5ff';  
+                style[mxConstants.STYLE_GRADIENTCOLOR] = '#7d85df';  
+                style[mxConstants.STYLE_SHADOW] = '1';  
+                  
+                // 启用浏览器默认菜单  
+                new mxRubberband(graph);  
+                  
+                //  创建默认窗体  
+                var parent = graph.getDefaultParent();  
+                                  
+                // 开启更新事务  
+                graph.getModel().beginUpdate();  
+                try  
+                {  
+                    var v1 = graph.insertVertex(parent, null, 'A1', 20, 20, 40, 80, 'shape=and');  
+                    var v2 = graph.insertVertex(parent, null, 'A2', 20, 220, 40, 80, 'shape=and');  
+                    var v3 = graph.insertVertex(parent, null, 'X1', 160, 110, 80, 80, 'shape=xor');  
+                    var e1 = graph.insertEdge(parent, null, '', v1, v3);  
+                    e1.geometry.points = [new mxPoint(90, 60), new mxPoint(90, 130)];  
+                    var e2 = graph.insertEdge(parent, null, '', v2, v3);  
+                    e2.geometry.points = [new mxPoint(90, 260), new mxPoint(90, 170)];  
+                      
+                    var v4 = graph.insertVertex(parent, null, 'A3', 520, 20, 40, 80, 'shape=and;flipH=1');  
+                    var v5 = graph.insertVertex(parent, null, 'A4', 520, 220, 40, 80, 'shape=and;flipH=1');  
+                    var v6 = graph.insertVertex(parent, null, 'X2', 340, 110, 80, 80, 'shape=xor;flipH=1');  
+                    var e3 = graph.insertEdge(parent, null, '', v4, v6);  
+                    e3.geometry.points = [new mxPoint(490, 60), new mxPoint(130, 130)];  
+                    var e4 = graph.insertEdge(parent, null, '', v5, v6);  
+                    e4.geometry.points = [new mxPoint(490, 260), new mxPoint(130, 170)];  
+                      
+                    var v7 = graph.insertVertex(parent, null, 'O1', 250, 260, 80, 60, 'shape=or;direction=south');  
+                    var e5 = graph.insertEdge(parent, null, '', v6, v7);  
+                    e5.geometry.points = [new mxPoint(310, 150)];  
+                    var e6 = graph.insertEdge(parent, null, '', v3, v7);  
+                    e6.geometry.points = [new mxPoint(270, 150)];  
+                      
+                    var e7 = graph.insertEdge(parent, null, '', v7, v5);  
+                    e7.geometry.points = [new mxPoint(290, 370)];  
+                }  
+                finally  
+                {  
+                    // 结束更新事务  
+                    graph.getModel().endUpdate();  
+                }  
+                  
+                document.body.appendChild(mxUtils.button('左右变化FlipH', function()  
+                {  
+                    graph.toggleCellStyles(mxConstants.STYLE_STENCIL_FLIPH);  
+                }));  
+                  
+                document.body.appendChild(mxUtils.button('上下变化FlipV', function()  
+                {  
+                    graph.toggleCellStyles(mxConstants.STYLE_STENCIL_FLIPV);  
+                }));  
+  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+  
+                document.body.appendChild(mxUtils.button('顺时针上下左右变化Rotate', function()   
+                {  
+                    var cell = graph.getSelectionCell();  
+                      
+                    if (cell != null)  
+                    {  
+                        var geo = graph.getCellGeometry(cell);  
+      
+                        if (geo != null)  
+                        {  
+                            graph.getModel().beginUpdate();  
+                            try  
+                            {  
+                                // 旋转的几何形状的大小和位置  
+                                geogeo = geo.clone();  
+                                geo.x += geo.width / 2 - geo.height / 2;  
+                                geo.y += geo.height / 2 - geo.width / 2;  
+                                var tmp = geo.width;  
+                                geogeo.width = geo.height;  
+                                geo.height = tmp;  
+                                graph.getModel().setGeometry(cell, geo);  
+                                  
+                                // 读取当前90度的方向和样式  
+                                var state = graph.view.getState(cell);  
+                                  
+                                if (state != null)  
+                                {  
+                                    var dir = state.style[mxConstants.STYLE_DIRECTION] || 'east'/*default*/;  
+                                      
+                                    if (dir == 'east')  
+                                    {  
+                                        dir = 'south';  
+                                    }  
+                                    else if (dir == 'south')  
+                                    {  
+                                        dir = 'west';  
+                                    }  
+                                    else if (dir == 'west')  
+                                    {  
+                                        dir = 'north';  
+                                    }  
+                                    else if (dir == 'north')  
+                                    {  
+                                        dir = 'east';  
+                                    }  
+                                      
+                                    graph.setCellStyles(mxConstants.STYLE_DIRECTION, dir, [cell]);  
+                                }  
+                            }  
+                            finally  
+                            {  
+                                graph.getModel().endUpdate();  
+                            }  
+                        }  
+                    }  
+                }));  
+  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                document.body.appendChild(document.createTextNode('\u00a0'));  
+                  
+                document.body.appendChild(mxUtils.button('三角And', function()  
+                {  
+                    graph.setCellStyles(mxConstants.STYLE_SHAPE, 'and');  
+                }));  
+                document.body.appendChild(mxUtils.button('半圆Or', function()  
+                {  
+                    graph.setCellStyles(mxConstants.STYLE_SHAPE, 'or');  
+                }));  
+                document.body.appendChild(mxUtils.button('月圆Xor', function()   
+                {  
+                    graph.setCellStyles(mxConstants.STYLE_SHAPE, 'xor');  
+                }));  
+            }  
+        };  
+    </script>  
+</head>  
+  
+<!-- 页面载入时启动程序 -->  
+<body onload="main(document.getElementById('graphContainer'))">  
+  
+    <!-- 创建带网格壁纸和曲线的一个容器  -->  
+    <div id="graphContainer"  
+        style="position:relative;overflow:hidden;width:601px;height:401px;background:url('editors/images/grid.gif');cursor:default;">  
+    </div>  
+</body>  
+</html>  

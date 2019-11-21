@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑框</title>
+    <script type="text/javascript">mxBasePath = '../src'; </script>
+    <script type="text/javascript" src="../src/js/mxClient.js" ></script>
+    
+    <script type="text/javascript">
+        function main(container){
+            if(!mxClient.isBrowserSupported()){
+                mxUtils.errot('browser is not supported!',200,false);            
+            }else{
+                var graph = new mxGraph(container);
+                
+                //设置htmlLabels
+                graph.setHtmlLabels(true);
+                
+                //给图形对象添加按键事件
+                var keyHandler = new mxKeyHandler(graph);
+                
+                //鼠标事件触发，返回选中对象字段名称
+                var getFieldnameForEvent = function(cell,evt){
+                    if(evt != null){//如果有事件触发
+                        //使用指定容器的偏移量转换指定的点(x, y)，并返回一个新的mxPoint。(即相对容器，鼠标所点击的位置坐标)
+                        var point =mxUtils.convertPoint(graph.container,evt.clientX,evt.clientY);
+                        
+                        //返回给定cell的状态state
+                        var state = graph.getView().getState(cell);
+                        
+                        if(state != null){
+                            
+                            point.x -= state.x;
+                            point.y -= state.y;
+                            
+                            //判断事件坐标位置
+                            if(point.y > state.height/3){
+                                if(point.y>((state.height/3)*2)){
+                                    //如果大于高度的2/3，则返回‘three’
+                                    return 'three';
+                                }
+                                //如果鼠标点击的位置相相对于graph，在其高度的1/3~2/3内，则返回‘second’
+                                return 'second';
+                            }
+                            
+                        }
+                    }
+                    return 'first';
+                };
+                
+                //返回含有上下内容的表格(三行一列)
+                graph.getLabel = function(cell){
+                    var table = document.createElement('table');
+                    table.style.height = '100%';
+                    table.style.width = '100%';
+                    
+                    var body = document.createElement('tbody');
+                    var tr1 = document.createElement('tr');
+                    var td1 = document.createElement('td');
+                    td1.style.fontSize = '12px';
+                    mxUtils.write(td1,cell.value.first);
+                    
+                    var tr2 = document.createElement('tr');
+                    var td2 = document.createElement('td');
+                    td2.style.fontSize = '12px';
+                    mxUtils.write(td2,cell.value.second);
+                    
+                    var tr3 = document.createElement('tr');
+                    var td3 = document.createElement('td');
+                    td3.style.fontSize = '12px';
+                    mxUtils.write(td3,cell.value.three);
+                    
+                    tr1.appendChild(td1);
+                    tr2.appendChild(td2);
+                    tr3.appendChild(td3);
+                    
+                    body.appendChild(tr1);
+                    body.appendChild(tr2);
+                    body.appendChild(tr3);
+                    
+                    table.appendChild(body);
+                    
+                    return table;
+            
+                };
+                
+                //返回要编辑的内容
+                graph.getEditingValue = function(cell,evt){
+                    evt.fieldname = getFieldnameForEvent(cell,evt);
+                    return cell.value[evt.fieldname] || ' ';
+                };
+                
+                //标签内容改变时触发元素内值的更新
+                graph.labelChanged = function(cell,newValue,trigger){
+                    var name = (trigger != null)?trigger.fieldname:null;
+                    //有触发器并且，元素内容不为空
+                    if(name != null){
+                        var value = mxUtils.clone(cell.value);
+                        value[name] = newValue;
+                        newValue = value;
+                        
+                        mxGraph.prototype.labelChanged.apply(this,arguments);
+                    }
+                };
+                
+                //给示例对象赋值
+                var value = new Object();
+                
+                value.first = '上部内容';
+                value.second = '中部内容';
+                value.three = '下部内容';
+                
+                //获取默认元对象
+                var parent = graph.getDefaultParent();
+                
+                //在图形中添加元对象
+                graph.getModel().beginUpdate();
+                try{
+                    var v1 = graph.insertVertex(parent,null,value,100,60,120,80,'overflow = fill;');
+                }finally{
+                    graph.getModel().endUpdate();
+                }
+                
+                
+            }
+        }
+    </script>
+</head>
+<body onload = "main(document.getElementById('graphContainer'))">
+    <p>
+        双击上(下)一半的单元格 编辑不同领域的对象
+    </p>
+   
+    <div id="graphContainer" style="overflow:hidden;position:relative;width:312px;hight:241px;
+       background:url('editors/images/grid.gif');"></div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>边界</title>
+    <script type="text/javascript"> mxBasePath = '../src';</script>
+    <script type="text/javascript" src="../src/js/mxClient.js" ></script>
+    
+    <script type="text/javascript">
+        function main(container){
+            if(!mxClient.isBrowserSupported()){
+                mxUtils.error('Browser is not supported!',200,false);
+            }else{
+                mxRectangleShape.prototype.crisp=true;
+                
+                //getPerimeterPoint:返回一个mxPoint，它定义了周长与形状中心和指定点之间的交点的位置。
+                //即图形中心点与指定点的连线和图形边线的交点
+                mxGraphViewGetPerimeterPoint = mxGraphView.prototype.getPerimeterPoint;
+                
+                mxGraphView.prototype.getPerimeterPoint = function(terminal,next,orthogonal,border){
+                    var point = mxGraphViewGetPerimeterPoint.apply(this,arguments);
+                    
+                    if(point != null){
+                        var perimeter = this.getPerimeterFunction(terminal);
+                        
+                        if(terminal.text != null && terminal.text.boundingBox != null){
+                            var b = terminal.text.boundingBox.clone();
+                            b.grow(3);
+                            
+                            if(mxUtils.rectangleIntersectsSegment(b,point,next)){
+                                point = perimeter(b,terminal,next,orthogonal);
+                            }
+                        }
+                    }
+                    return point;
+                };
+                
+                var graph = new mxGraph(container);
+                graph.setVertexLabelsMovable(true);
+                graph.setConnectable(true);
+                
+                graph.setResizeContainer(true);
+                
+                //删除操作
+                document.body.appendChild(mxUtils.button('delete',function(){
+                    graph.removeCells();
+                }));
+                
+                var undoManager = new mxUndoManager();
+                var listener = function(sender,evt){
+                    undoManager.undoableEditHappened(evt.getProperty('edit'));
+                };
+                
+                graph.getModel().addListener(mxEvent.UNDO,listener);
+                graph.getView().addListener(mxEvent.UNDO,listener);
+                
+                //undo(对图形进行了操作之后，undo进行复位还原) 操作，undo总是奔着原图形结构布局去的
+                document.body.appendChild(mxUtils.button('Undo',function(){
+                    undoManager.undo();
+                }));
+                
+                //redo(在undo操作的基础，还原undo之前的操作)操作，redo总是奔着改变之后的图形布局去的
+                document.body.appendChild(mxUtils.button('Redo',function(){
+                    undoManager.redo();
+                }));
+                
+                new mxRubberband(graph);
+                
+                var parent = graph.getDefaultParent();
+                
+                graph.getModel().beginUpdate();
+                
+                try{
+                    var v1 = graph.insertVertex(parent,null,'label',20,20,80,30,'verticalLabelPosition=bottom');
+                    var v2 = graph.insertVertex(parent,null,'label',200,20,80,30,'verticalLabelPosition=bottom');
+                    var v3 = graph.insertVertex(parent,null,'label',20,150,80,30,'verticalLabelPosition=bottom');
+                    
+                    var e1 = graph.insertEdge(parent,null,'edge',v1,v2);
+                    var e2 = graph.insertEdge(parent,null,'edge',v1,v3);
+                }finally{
+                    graph.getModel().endUpdate();
+                }
+            }
+        };
+    </script>
+</head>
+<body onload="main(document.getElementById('graphContainer'));">
+    <div id="graphContainer" style="overflow:hidden;position:relative;width:312px;hight:241px;
+       background:url('editors/images/grid.gif');cursor:default;">
+        
+    </div>
+</body>
+</html>
