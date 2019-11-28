@@ -1,0 +1,46 @@
+<shapes>
+    <shape name="mTriangle" aspect="variable" strokewidth="inherit"> 
+        <connections>
+            <constraint perimeter="0" x="0.5" y="0" name="n" />
+            <constraint perimeter="0" x="1" y="0.5" name="e" />
+            <constraint perimeter="0" x="0.5" y="1" name="s" />
+            <constraint perimeter="0" x="0" y="0.5" name="w" />
+        </connections>
+        <background>
+            <!-- <linejoin join="round" /> -->
+            <!-- 图形基础宽高 外边框默认是宽高均为100 -->
+            <path>
+                <move x="0" y="0" />
+                <line x="100" y="50" />
+                <line x="0" y="100" />
+                <close />
+            </path>
+        </background>
+        <foreground>
+            <fillstroke />
+        </foreground>
+    <shape>
+
+    <shape name="mArrow" h="97.5" w="70" aspect="variable"
+		strokewidth="inherit">
+		<connections>
+			<constraint x="0.5" y="0" perimeter="0" name="n" />
+			<constraint x="0.5" y="1" perimeter="0" name="s" />
+		</connections>
+		<background>
+			<path>
+				<move x="20" y="0" />
+				<line x="20" y="59" />
+				<line x="0" y="59" />
+				<line x="35" y="97.5" />
+				<line x="70" y="59" />
+				<line x="50" y="59" />
+				<line x="50" y="0" />
+				<close />
+			</path>
+		</background>
+		<foreground>
+			<fillstroke />
+		</foreground>
+	</shape>
+</shapes>

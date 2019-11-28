@@ -24,7 +24,8 @@
             else  
             {  
                 // 模版加载导入形状xml定义文件  
-                var req = mxUtils.load('stencils.xml');  
+                var req = mxUtils.load('customShape.xml');
+                // var req = mxUtils.load('stencils.xml');  
                 var root = req.getDocumentElement();  
                 var shape = root.firstChild;  
 
@@ -67,9 +68,8 @@
                 graph.getModel().beginUpdate();  
                 try  
                 {  
-                    var v1 = graph.insertVertex(parent, null, 'A1', 20, 20, 40, 80, 'shape=or');  
-                    var v2 = graph.insertVertex(parent, null, 'A2', 120, 20, 40, 80, 'shape=xor'); 
-                    var v3 = graph.insertVertex(parent, null, 'A3', 220, 20, 40, 80, 'shape=and');
+                    var v1 = graph.insertVertex(parent, null, '三角', 20, 20, 40, 80, 'shape=mTriangle');  
+                    var v2 = graph.insertVertex(parent, null, '箭头', 120, 20, 40, 80, 'shape=mArrow'); 
                 }  
                 finally  
                 {  
