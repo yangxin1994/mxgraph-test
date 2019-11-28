@@ -1,0 +1,92 @@
+<!Doctype html>  
+<html xmlns=http://www.w3.org/1999/xhtml>  
+    <head>  
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">  
+    <title>加载自定义形状</title>  
+  
+    <script type="text/javascript">  
+        mxBasePath = '../src';  
+    </script>  
+  
+    <!-- 引入支持库文件 -->  
+    <script type="text/javascript" src="../src/js/mxClient.js"></script>  
+  
+    <!-- 示例代码 -->  
+    <script type="text/javascript">  
+        //  程序在此方法中启动   
+        function main(container)  
+        {  
+            // 检查浏览器支持  
+            if (!mxClient.isBrowserSupported())  
+            {  
+                mxUtils.error('Browser is not supported!', 200, false);  
+            }  
+            else  
+            {  
+                // 模版加载导入形状xml定义文件  
+                var req = mxUtils.load('stencils.xml');  
+                var root = req.getDocumentElement();  
+                var shape = root.firstChild;  
+
+                while (shape != null)  
+                {  
+                    if (shape.nodeType == mxConstants.NODETYPE_ELEMENT)  
+                    {  
+                        console.log(shape)
+                        // 注册形状
+                        mxStencilRegistry.addStencil(shape.getAttribute('name'), new mxStencil(shape));  
+                    }  
+                      
+                    shape = shape.nextSibling;  
+                }  
+                  
+                // 在容器中创建图形  
+                var graph = new mxGraph(container);  
+                // 可连接
+                graph.setConnectable(true); 
+                 // 默认edge样式  
+                 var style = graph.getStylesheet().getDefaultEdgeStyle();  
+                //  线条样式为 orthogonalEdgeStyle(key和value都定义在mxConstants.js文件)
+                style[mxConstants.STYLE_EDGE] = 'orthogonalEdgeStyle';  
+                // 默认vertext样式
+                style = graph.getStylesheet().getDefaultVertexStyle();  
+                // 填充色
+                style[mxConstants.STYLE_FILLCOLOR] = '#adc5ff';  
+                // 渐变色
+                style[mxConstants.STYLE_GRADIENTCOLOR] = 'yellow';  
+                // 阴影
+                style[mxConstants.STYLE_SHADOW] = '1';  
+                  
+                // 启用浏览器默认菜单  
+                new mxRubberband(graph);  
+                  
+                //  创建默认窗体  
+                var parent = graph.getDefaultParent();  
+                                  
+                // 开启更新事务  
+                graph.getModel().beginUpdate();  
+                try  
+                {  
+                    var v1 = graph.insertVertex(parent, null, 'A1', 20, 20, 40, 80, 'shape=or');  
+                    var v2 = graph.insertVertex(parent, null, 'A2', 120, 20, 40, 80, 'shape=xor'); 
+                    var v3 = graph.insertVertex(parent, null, 'A3', 220, 20, 40, 80, 'shape=and');
+                }  
+                finally  
+                {  
+                    // 结束更新事务  
+                    graph.getModel().endUpdate();  
+                }  
+            }  
+        };  
+    </script>  
+</head>  
+  
+<!-- 页面载入时启动程序 -->  
+<body onload="main(document.getElementById('graphContainer'))">  
+  
+    <!-- 创建带网格壁纸和曲线的一个容器  -->  
+    <div id="graphContainer"  
+        style="position:relative;overflow:hidden;width:601px;height:401px;background:url('editors/images/grid.gif');cursor:default;">  
+    </div>  
+</body>  
+</html>  
